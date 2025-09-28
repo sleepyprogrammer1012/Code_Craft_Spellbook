@@ -1,6 +1,6 @@
-Copyright © 2025 Ikeeludead. All rights reserved.
+Copyright © 2025 sleepyprogrammer1012. All rights reserved.
 
-This software and its associated assets (collectively, “CodeCraft Chronicles”) are the intellectual property of Ikeeludead.
+This software and its associated assets (collectively, “Code Craft Spellbook”) are the intellectual property of Ikeeludead.
 
 ## Permissions
 
@@ -22,7 +22,7 @@ You may not:
 
 If you share gameplay footage or content, please credit the project as:
 
-> “CodeCraft Chronicles by Ikeeludead”
+> “Code Craft Spellbook by sleepyprogrammer1012”
 
 ## Disclaimer
 

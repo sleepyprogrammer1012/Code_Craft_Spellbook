@@ -9,6 +9,7 @@ Licensed for personal, educational, and non-commercial use only.
 
 **Code Craft Spellbook** is a level-based educational game that teaches the fundamentals of game development through interactive coding challenges. Players unlock spells—JavaScript-like commands—that manipulate the game world, solve puzzles, and defeat enemies.
 
+<img src="https://visitor-badge.laobi.icu/badge?page_id=sleepyprogrammer1012.Code_Craft_Spellbook&color=blue&style=flat-square" alt="visitor badge"/>
 ---
 
 ## 🎮 Gameplay Overview

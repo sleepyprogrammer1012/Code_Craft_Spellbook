@@ -1,4 +1,4 @@
-Copyright © 2025 sleepyprogrammer1012. All rights reserved.
+# Copyright © 2025 sleepyprogrammer1012. All rights reserved.
 
 This software and its associated assets (collectively, “Code Craft Spellbook”) are the intellectual property of Ikeeludead.
 

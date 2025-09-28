@@ -9,17 +9,15 @@ Licensed for personal, educational, and non-commercial use only.
 
 **Code Craft Spellbook** is a level-based educational game that teaches the fundamentals of game development through interactive coding challenges. Players unlock spells—JavaScript-like commands—that manipulate the game world, solve puzzles, and defeat enemies.
 
---
+---
+
 ## 🛡️ Badges
-<img src="https://visitor-badge.laobi.icu/badge?page_id=sleepyprogrammer1012.Code_Craft_Spellbook&color=blue&style=flat-square" alt="visitor badge"/> <img src="https://img.shields.io/github/stars/sleepyprogrammer1012/Code_Craft_Spellbook?style=social" alt="GitHub stars"/> <img src="https://img.shields.io/github/forks/sleepyprogrammer1012/Code_Craft_Spellbook?style=social" alt="GitHub forks"/> <img src="https://img.shields.io/badge/Spellbook-Ready%20to%20Cast-purple?style=for-the-badge" alt="Spellbook badge"/> <img src="https://img.shields.io/badge/Made%20with-%E2%9D%A4-red?style=flat-square" alt="Made with love"/> <img src="https://img.shields.io/badge/Powered%20by-Coffee-brown?style=flat-square" alt="Coffee badge"/> <img src="https://img.shields.io/badge/HTML-5-orange?style=flat-square" alt="HTML badge"/> <img src="https://img.shields.io/badge/Hosted%20on-GitHub%20Pages-blue?style=flat-square" alt="GitHub Pages badge"/> <img src="https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif" alt="Powered by Magic" width="150"/>
+
+<img src="https://visitor-badge.laobi.icu/badge?page_id=sleepyprogrammer1012.Code_Craft_Spellbook&color=blue&style=flat-square" alt="visitor badge"/> <img src="https://img.shields.io/github/stars/sleepyprogrammer1012/Code_Craft_Spellbook?style=social" alt="GitHub stars"/> <img src="https://img.shields.io/github/forks/sleepyprogrammer1012/Code_Craft_Spellbook?style=social" alt="GitHub forks"/> <img src="https://img.shields.io/badge/Spellbook-Ready%20to%20Cast-purple?style=for-the-badge" alt="Spellbook badge"/> <img src="https://img.shields.io/badge/Made%20with-%E2%9D%A4-red?style=flat-square" alt="Made with love"/> <img src="https://img.shields.io/badge/Powered%20by-Coffee-brown?style=flat-square" alt="Coffee badge"/> <img src="https://img.shields.io/badge/HTML-5-orange?style=flat-square" alt="HTML badge"/> <img src="https://img.shields.io/badge/Hosted%20on-GitHub%20Pages-blue?style=flat-square" alt="GitHub Pages badge"/> 
 
 
 
-
-
-
-
-                                                         ⎛⎝ ≽  >  ⩊   < ≼ ⎠⎞
+                                                       ⎛⎝ ≽  >  ⩊   < ≼ ⎠⎞
 ---
 
 ## 🎮 Gameplay Overview

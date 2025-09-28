@@ -1,3 +1,10 @@
+<!--© 2025 sleepyprogrammer1012. All rights reserved.
+
+This project, CodeCraft Chronicles, and all associated source code, assets, and content are the intellectual property of Ikeeludead. Unauthorized reproduction, distribution, or modification of any part of this project is prohibited without explicit written permission.
+
+Licensed for personal, educational, and non-commercial use only.
+-->
+
 # 🧙‍♂️ CodeCraft Chronicles
 
 **CodeCraft Chronicles** is a level-based educational game that teaches the fundamentals of game development through interactive coding challenges. Players unlock spells—JavaScript-like commands—that manipulate the game world, solve puzzles, and defeat enemies.
@@ -54,3 +61,10 @@ To run the game locally:
    git clone https://github.com/sleepyprogrammer1012/codecraft-chronicles.git
    cd codecraft-chronicles
 2. Open in browser: [Click Here!](https://sleepyprogrammer1012.github.io/Code_Craft_Spellbook/)
+
+<!--© 2025 sleepyprogrammer1012. All rights reserved.
+
+This project, CodeCraft Chronicles, and all associated source code, assets, and content are the intellectual property of Ikeeludead. Unauthorized reproduction, distribution, or modification of any part of this project is prohibited without explicit written permission.
+
+Licensed for personal, educational, and non-commercial use only.
+-->

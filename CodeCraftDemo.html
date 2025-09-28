@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>CodeCraft: Level-Based Spell Tutorial</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+    /* Body & Layout */
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a1a1a;
+      color: #e0e0e0;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+    }
+    #game-container {
+      display: flex;
+      gap: 20px;
+      background: #2b2b2b;
+      border: 4px solid #444;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    /* Game World */
+    #game-world {
+      position: relative;
+      width: 500px;
+      height: 500px;
+      background: #5a8d49;
+      border: 4px solid #38572e;
+      overflow: hidden;
+    }
+    .entity {
+      position: absolute;
+      border-radius: 5px;
+      transition: left 0.1s linear, top 0.1s linear;
+    }
+    #player {
+      width: 40px;
+      height: 40px;
+      background: #4a90e2;
+      border: 3px solid #1e3a5c;
+      left: 50px;
+      top: 400px;
+    }
+    #speech-bubble {
+      position: absolute;
+      background: white;
+      color: black;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 2px solid #333;
+      max-width: 180px;
+      text-align: center;
+      font-family: sans-serif;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+    #speech-bubble.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* HUD */
+    #hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-family: 'Press Start 2P', cursive;
+      color: #ffd700;
+      font-size: 16px;
+    }
+
+    /* Spellbook */
+    #spellbook {
+      width: 400px;
+      display: flex;
+      flex-direction: column;
+      background: #3c3c3c;
+      padding: 20px;
+      border: 4px solid #444;
+      border-radius: 5px;
+    }
+    #spellbook h2 {
+      margin: 0 0 15px;
+      font-family: 'Press Start 2P', cursive;
+      color: #ffd700;
+      text-align: center;
+      font-size: 24px;
+    }
+    #quest-text {
+      background: #252525;
+      border-left: 4px solid #ffd700;
+      padding: 12px;
+      margin-bottom: 15px;
+      min-height: 100px;
+      white-space: pre-wrap;
+      font-family: monospace;
+    }
+    #spell-list {
+      margin-bottom: 15px;
+    }
+    #spell-list h3 {
+      margin: 0 0 5px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 16px;
+      color: #ffd700;
+    }
+    #learned-spells {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    #learned-spells li {
+      font-family: monospace;
+      font-size: 16px;
+      margin: 2px 0;
+    }
+
+    /* Editor & Console */
+    #code-editor {
+      flex: 1;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border: 2px solid #555;
+      border-radius: 5px;
+      padding: 10px;
+      font-size: 18px;
+      font-family: 'VT323', monospace;
+      resize: none;
+    }
+    #run-button {
+      margin-top: 12px;
+      padding: 10px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+    #run-button:hover {
+      background: #45a049;
+    }
+    #console-output {
+      margin-top: 12px;
+      background: #1e1e1e;
+      height: 80px;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    .console-info  { color: #888; }
+    .console-success { color: #4caf50; }
+    .console-error   { color: #f44336; }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="game-world">
+      <div id="hud">
+        Score: <span id="score">0</span>&nbsp;&nbsp;
+        Health: <span id="health">100</span>
+      </div>
+      <div id="player" class="entity"></div>
+      <div id="speech-bubble"></div>
+    </div>
+    <div id="spellbook">
+      <h2>CodeCraft Spellbook</h2>
+      <p id="quest-text"></p>
+      <div id="spell-list">
+        <h3>Spells Learned:</h3>
+        <ul id="learned-spells"></ul>
+      </div>
+      <textarea id="code-editor" spellcheck="false" disabled></textarea>
+      <button id="run-button" disabled>Cast Spells</button>
+      <div id="console-output">
+        <p class="console-info">&gt; Console ready...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // DOM refs
+    const world     = document.getElementById('game-world');
+    const playerEl  = document.getElementById('player');
+    const bubble    = document.getElementById('speech-bubble');
+    const questText = document.getElementById('quest-text');
+    const editor    = document.getElementById('code-editor');
+    const runBtn    = document.getElementById('run-button');
+    const consoleEl = document.getElementById('console-output');
+    const scoreEl   = document.getElementById('score');
+    const healthEl  = document.getElementById('health');
+    const spellsUl  = document.getElementById('learned-spells');
+
+    // Game state
+    let pos           = { x: 50, y: 400 };
+    const speed       = 10;
+    let score         = 0;
+    let health        = 100;
+    let entityCount   = 0;
+    let currentLevel  = 0;
+    const learned     = [];
+
+    // Spell definitions & tutorial levels
+    const levels = [
+      {
+        unlock: 'print',
+        tutorial:
+`Level 1 – The Basics of print()
+Use print("Hello!") to display text.
+
+Try: print("Hello, adventurer!")`,
+        goalCheck: lines => lines.some(l => /^print\s*\(/.test(l))
+      },
+      {
+        unlock: 'move',
+        tutorial:
+`Level 2 – Moving Around with move()
+Use move("direction", steps) to reposition.
+
+Example:
+  print("Moving…");
+  move("up", 2)`,
+        goalCheck: lines => lines.some(l => /^move\s*\(/.test(l))
+      },
+      {
+        unlock: 'wait',
+        tutorial:
+`Level 3 – Pausing with wait()
+Use wait(ms) to pause your spell sequence.
+
+Example:
+  print("Start");
+  wait(1000);
+  print("Done waiting")`,
+        goalCheck: lines => lines.some(l => /^wait\s*\(/.test(l))
+      },
+      {
+        unlock: 'spawn',
+        tutorial:
+`Level 4 – Spawning Entities
+Use spawn("type", x, y) to add new entities.
+
+Example: spawn("enemy", 300, 200)`,
+        goalCheck: lines => lines.some(l => /^spawn\s*\(/.test(l))
+      },
+      {
+        unlock: 'destroyAll',
+        tutorial:
+`Level 5 – Clearing Entities
+Use destroyAll("type") to remove all of a given type.
+
+Example: destroyAll("enemy")`,
+        goalCheck: lines => lines.some(l => /^destroyAll\s*\(/.test(l))
+      },
+      {
+        unlock: 'changeColor',
+        tutorial:
+`Level 6 – Changing Colors
+Use changeColor("id", "#RRGGBB") to tweak visuals.
+
+Example: changeColor("player", "#ff0000")`,
+        goalCheck: lines => lines.some(l => /^changeColor\s*\(/.test(l))
+      },
+      {
+        unlock: 'playSound',
+        tutorial:
+`Level 7 – Playing Sounds
+Use playSound("name") to trigger audio.
+
+Example: playSound("spell")`,
+        goalCheck: lines => lines.some(l => /^playSound\s*\(/.test(l))
+      },
+      {
+        unlock: 'adjustScore',
+        tutorial:
+`Level 8 – Score Management
+Use adjustScore(n) to modify the score display.
+
+Example: adjustScore(10)`,
+        goalCheck: lines => lines.some(l => /^adjustScore\s*\(/.test(l))
+      },
+      {
+        unlock: 'adjustHealth',
+        tutorial:
+`Level 9 – Health Management
+Use adjustHealth(n) to change health.
+
+Example: adjustHealth(-20)`,
+        goalCheck: lines => lines.some(l => /^adjustHealth\s*\(/.test(l))
+      },
+      {
+        unlock: 'random',
+        tutorial:
+`Level 10 – Randomness
+Use random(min, max) to get a random integer.
+
+Example: random(1,100)`,
+        goalCheck: lines => lines.some(l => /^random\s*\(/.test(l))
+      },
+      {
+        unlock: 'repeat',
+        tutorial:
+`Level 11 – Looping
+Use repeat(times, "code") to run code blocks multiple times.
+
+Example:
+  repeat(3, "print('Echo'); wait(300)")`,
+        goalCheck: lines => lines.some(l => /^repeat\s*\(/.test(l))
+      },
+      {
+        unlock: 'ifCollision',
+        tutorial:
+`Level 12 – Simple Conditionals
+Use ifCollision("id1","id2","code") to run on overlap.
+
+Example:
+  spawn("enemy",200,200);
+  ifCollision("player","enemy","destroyAll('enemy');adjustScore(5)")`,
+        goalCheck: lines => lines.some(l => /^ifCollision\s*\(/.test(l))
+      }
+    ];
+
+    // Audio assets
+    const sounds = {
+      footstep: new Audio('https://freesound.org/data/previews/341/341695_5260871-lq.mp3'),
+      spell:    new Audio('https://freesound.org/data/previews/320/320654_5260871-lq.mp3'),
+      enemyDie: new Audio('https://freesound.org/data/previews/331/331912_3248244-lq.mp3')
+    };
+
+    // Logging
+    function log(msg, type='info') {
+      consoleEl.innerHTML = `<p class="console-${type}">&gt; ${msg}</p>`;
+    }
+
+    // Update HUD
+    function updateHUD() {
+      scoreEl.textContent  = score;
+      healthEl.textContent = health;
+    }
+
+    // Update player position
+    function updatePlayer() {
+      playerEl.style.left = pos.x + 'px';
+      playerEl.style.top  = pos.y + 'px';
+    }
+
+    // Render learned spells list
+    function renderLearned() {
+      spellsUl.innerHTML = '';
+      learned.forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s + '()';
+        spellsUl.appendChild(li);
+      });
+    }
+
+    // Show a speech bubble at the player
+    function animateSpeech(text) {
+      bubble.textContent = text;
+      const wr = world.getBoundingClientRect();
+      const pr = playerEl.getBoundingClientRect();
+      bubble.style.left = (pr.left - wr.left + pr.width/2 - bubble.offsetWidth/2) + 'px';
+      bubble.style.top  = (pr.top  - wr.top  - bubble.offsetHeight - 12) + 'px';
+      bubble.classList.add('visible');
+      setTimeout(() => bubble.classList.remove('visible'), 1800);
+    }
+
+    // Execute a list of statements
+    async function execStatements(lines) {
+      for (let stmt of lines) {
+        let m;
+        // print()
+        if (m = stmt.match(/^print\(\s*["'](.+?)["']\s*\)$/)) {
+          animateSpeech(m[1]);
+          sounds.spell.play();
+        }
+        // move()
+        else if (m = stmt.match(/^move\(\s*["'](up|down|left|right)["']\s*,\s*(\d+)\s*\)$/)) {
+          sounds.footstep.play();
+          for (let i = 0; i < +m[2]; i++) {
+            if (m[1] === 'up')    pos.y -= speed;
+            if (m[1] === 'down')  pos.y += speed;
+            if (m[1] === 'left')  pos.x -= speed;
+            if (m[1] === 'right') pos.x += speed;
+            updatePlayer();
+            await new Promise(r => setTimeout(r, 100));
+          }
+        }
+        // wait()
+        else if (m = stmt.match(/^wait\(\s*(\d+)\s*\)$/)) {
+          await new Promise(r => setTimeout(r, +m[1]));
+        }
+        // spawn()
+        else if (m = stmt.match(/^spawn\(\s*["'](\w+)["']\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/)) {
+          const id       = `ent${++entityCount}`;
+          const div      = document.createElement('div');
+          div.id         = id;
+          div.className  = 'entity ' + m[1];
+          div.style.left = m[2] + 'px';
+          div.style.top  = m[3] + 'px';
+          // default style for "enemy"
+          if (m[1] === 'enemy') {
+            div.style.width  = '30px';
+            div.style.height = '30px';
+            div.style.background = '#e24a4a';
+            div.style.border = '2px solid #6c1e1e';
+            div.style.borderRadius = '50%';
+          }
+          world.appendChild(div);
+        }
+        // destroyAll()
+        else if (m = stmt.match(/^destroyAll\(\s*["'](\w+)["']\s*\)$/)) {
+          document.querySelectorAll(`.${m[1]}`).forEach(el => {
+            el.remove();
+            sounds.enemyDie.play();
+          });
+        }
+        // changeColor()
+        else if (m = stmt.match(/^changeColor\(\s*["'](\w+)["']\s*,\s*["'](#?\w+)["']\s*\)$/)) {
+          const el = document.getElementById(m[1]);
+          if (el) el.style.background = m[2];
+        }
+        // playSound()
+        else if (m = stmt.match(/^playSound\(\s*["'](\w+)["']\s*\)$/)) {
+          const s = sounds[m[1]];
+          if (s) s.play();
+        }
+        // adjustScore()
+        else if (m = stmt.match(/^adjustScore\(\s*(-?\d+)\s*\)$/)) {
+          score += +m[1];
+          updateHUD();
+        }
+        // adjustHealth()
+        else if (m = stmt.match(/^adjustHealth\(\s*(-?\d+)\s*\)$/)) {
+          health = Math.max(0, health + +m[1]);
+          updateHUD();
+        }
+        // random()
+        else if (m = stmt.match(/^random\(\s*(\d+)\s*,\s*(\d+)\s*\)$/)) {
+          const val = Math.floor(Math.random() * (+m[2] - +m[1] + 1)) + +m[1];
+          log(`random → ${val}`, 'info');
+        }
+        // repeat()
+        else if (m = stmt.match(/^repeat\(\s*(\d+)\s*,\s*["'](.+?)["']\s*\)$/)) {
+          const [_, times, block] = m;
+          const inner = block.split(/[\n;]/).map(s=>s.trim()).filter(s=>s);
+          for (let i = 0; i < +times; i++) {
+            await execStatements(inner);
+          }
+        }
+        // ifCollision()
+        else if (m = stmt.match(/^ifCollision\(\s*["'](\w+)["']\s*,\s*["'](\w+)["']\s*,\s*["'](.+?)["']\s*\)$/)) {
+          const a = document.getElementById(m[1]);
+          const b = document.getElementById(m[2]);
+          if (a && b) {
+            const ra = a.getBoundingClientRect();
+            const rb = b.getBoundingClientRect();
+            if (!(ra.right < rb.left || ra.left > rb.right ||
+                  ra.bottom < rb.top || ra.top > rb.bottom)) {
+              const block = m[3].split(/[\n;]/).map(s=>s.trim()).filter(s=>s);
+              await execStatements(block);
+            }
+          }
+        }
+        else {
+          log(`Unknown spell: ${stmt}`, 'error');
+          return;
+        }
+      }
+    }
+
+    // Cast the player's code
+    async function castSpell() {
+      const lines = editor.value
+        .split(/[\n;]/).map(s=>s.trim()).filter(s=>s);
+      if (!lines.length) { log("No spells entered.", 'error'); return; }
+      await execStatements(lines);
+
+      // Check level completion
+      const lvl = levels[currentLevel];
+      if (lvl.goalCheck(lines)) {
+        learned.push(lvl.unlock);
+        renderLearned();
+        log(`You’ve mastered ${lvl.unlock}()!`, 'success');
+        editor.disabled = true;
+        runBtn.disabled = true;
+
+        // Advance after a short delay
+        if (currentLevel + 1 < levels.length) {
+          setTimeout(() => loadLevel(currentLevel + 1), 1000);
+        } else {
+          log('🎉 All levels complete! You are a CodeCraft master!', 'success');
+        }
+      }
+    }
+
+    // Load a level tutorial
+    function loadLevel(i) {
+      currentLevel = i;
+      const lvl = levels[i];
+      questText.textContent = lvl.tutorial;
+      editor.value      = '';
+      editor.disabled   = false;
+      runBtn.disabled   = false;
+      log(`Level ${i+1}: Learn ${lvl.unlock}()`, 'info');
+    }
+
+    // Keyboard movement
+    document.addEventListener('keydown', e => {
+      if (!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return;
+      if (e.key === 'ArrowUp')    pos.y = Math.max(0, pos.y - speed);
+      if (e.key === 'ArrowDown')  pos.y = Math.min(500 - 40, pos.y + speed);
+      if (e.key === 'ArrowLeft')  pos.x = Math.max(0, pos.x - speed);
+      if (e.key === 'ArrowRight') pos.x = Math.min(500 - 40, pos.x + speed);
+      sounds.footstep.play();
+      updatePlayer();
+    });
+
+    // Button click
+    runBtn.addEventListener('click', castSpell);
+
+    // Initialize
+    updatePlayer();
+    updateHUD();
+    renderLearned();
+    loadLevel(0);
+  });
+  </script>
+</body>
+</html>
+

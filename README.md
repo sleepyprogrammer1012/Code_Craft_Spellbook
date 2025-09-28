@@ -51,5 +51,6 @@ To run the game locally:
 
 1. Clone the repo  
    ```bash
-   git clone https://github.com/your-username/codecraft-chronicles.git
+   git clone https://github.com/sleepyprogrammer1012/codecraft-chronicles.git
    cd codecraft-chronicles
+2. Open in browser: [Click Here!](https://sleepyprogrammer1012.github.io/Code_Craft_Spellbook/)

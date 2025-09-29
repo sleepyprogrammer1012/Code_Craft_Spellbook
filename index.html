@@ -174,7 +174,12 @@ Licensed for personal, educational, and non-commercial use only.
     .console-info  { color: #888; }
     .console-success { color: #4caf50; }
     .console-error   { color: #f44336; }
-
+    
+    <audio id="menu-music" autoplay loop>
+      <source src="music/menu-theme.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
+    
     #start-menu {
       position: fixed;
       top: 0; left: 0;
@@ -249,10 +254,12 @@ Licensed for personal, educational, and non-commercial use only.
     // DOM refs
     const startMenu = document.getElementById('start-menu');
     const startBtn  = document.getElementById('start-button');
-    
+    const gameContainer = document.getElementById('game-container');
+
     startBtn.addEventListener('click', () => {
-  startMenu.style.display = 'none';
-  document.getElementById('game-container').style.display = 'flex';
+    startMenu.style.display = 'none';
+    document.getElementById('game-container').style.display = 'flex';
+    gameContainer.style.display = 'flex';
 });
 
 

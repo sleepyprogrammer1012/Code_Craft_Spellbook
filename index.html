@@ -177,7 +177,6 @@ Licensed for personal, educational, and non-commercial use only.
     
     <audio id="menu-theme" autoplay loop muted>
       <source src="https://raw.githubusercontent.com/sleepyprogrammer1012/Code_Craft_Spellbook/main/music/menu-theme.mp3" type="audio/mpeg" />
-      Your browser does not support the audio element.
     </audio>
     
     #start-menu {
@@ -256,7 +255,7 @@ Licensed for personal, educational, and non-commercial use only.
     const startButton = document.getElementById('start-button');
     const gameContainer = document.getElementById('game-container');
     const menuMusic = document.getElementById('menu-theme');
-    menuMusic.play();  // Only works if Autoplay isn't blocked
+    menuMusic.play().catch(err => console.error("Playback failed:", err));  // Only works if Autoplay isn't blocked
 
     startButton.addEventListener('click', () => {
       startMenu.style.display = 'none';

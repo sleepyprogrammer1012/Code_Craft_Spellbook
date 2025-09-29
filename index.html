@@ -250,16 +250,19 @@ Licensed for personal, educational, and non-commercial use only.
   </div>
 
   <script>
+    
   document.addEventListener('DOMContentLoaded', () => {
-    // DOM refs
-    const startMenu = document.getElementById('start-menu');
-    const startBtn  = document.getElementById('start-button');
-    const gameContainer = document.getElementById('game-container');
+  const startMenu = document.getElementById('start-menu');
+  const startButton = document.getElementById('start-button');
+  const gameContainer = document.getElementById('game-container');
+  const menuMusic = document.getElementById('menu-music');
 
-    startBtn.addEventListener('click', () => {
+  startButton.addEventListener('click', () => {
     startMenu.style.display = 'none';
-    document.getElementById('game-container').style.display = 'flex';
     gameContainer.style.display = 'flex';
+    menuMusic.pause();
+    menuMusic.currentTime = 0;
+  });
 });
 
 

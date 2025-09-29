@@ -10,6 +10,7 @@ Licensed for personal, educational, and non-commercial use only.
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CodeCraft: Level-Based Spell Tutorial</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
 
@@ -25,10 +26,6 @@ Licensed for personal, educational, and non-commercial use only.
       font-family: 'VT323', monospace;
       font-size: 18px;
     }
-     <div id="start-menu">
-       <h1>Welcome to CodeCraft Spellbook!</h1>
-       <button id="start-button">Start Adventure</button>
-     </div>
     
     #game-container {
       display: none;
@@ -41,40 +38,6 @@ Licensed for personal, educational, and non-commercial use only.
     }
 
     /* Game World */
-    #start-menu {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      color: #ffd700;
-      font-family: 'Press Start 2P', cursive;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-
-    #start-menu h1 {
-      font-size: 32px;
-      margin-bottom: 30px;
-    }
-
-    #start-button {
-      padding: 12px 24px;
-      font-size: 18px;
-      background: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    #start-button:hover {
-      background: #45a049;
-    }
-    
     #game-world {
       position: relative;
       width: 500px;
@@ -211,9 +174,52 @@ Licensed for personal, educational, and non-commercial use only.
     .console-info  { color: #888; }
     .console-success { color: #4caf50; }
     .console-error   { color: #f44336; }
+
+    #start-menu {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      color: #ffd700;
+      font-family: 'Press Start 2P', cursive;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    #start-menu h1 {
+      font-size: 32px;
+      margin-bottom: 30px;
+    }
+
+    #start-button {
+      padding: 12px 24px;
+      font-size: 18px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #start-button:hover {
+      background: #45a049;
+    }
+    
   </style>
 </head>
 <body>
+  
+  <!-- Start Menu -->
+  <div id="start-menu">
+    <h1>Welcome to CodeCraft</h1>
+    <button id="start-button">Start Adventure</button>
+  </div>
+  
+  <!-- Game Container -->
   <div id="game-container">
     <div id="game-world">
       <div id="hud">

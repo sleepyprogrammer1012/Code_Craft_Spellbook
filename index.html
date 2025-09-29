@@ -256,6 +256,7 @@ Licensed for personal, educational, and non-commercial use only.
   const startButton = document.getElementById('start-button');
   const gameContainer = document.getElementById('game-container');
   const menuMusic = document.getElementById('menu-theme');
+  menuMusic.play();  // Only works if Autoplay isn't blocked
 
   startButton.addEventListener('click', () => {
     startMenu.style.display = 'none';

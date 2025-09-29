@@ -10,7 +10,7 @@ Licensed for personal, educational, and non-commercial use only.
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CodeCraft: Level-Based Spell Tutorial</title>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
 
@@ -252,17 +252,17 @@ Licensed for personal, educational, and non-commercial use only.
   <script>
     
   document.addEventListener('DOMContentLoaded', () => {
-  const startMenu = document.getElementById('start-menu');
-  const startButton = document.getElementById('start-button');
-  const gameContainer = document.getElementById('game-container');
-  const menuMusic = document.getElementById('menu-theme');
-  menuMusic.play();  // Only works if Autoplay isn't blocked
+    const startMenu = document.getElementById('start-menu');
+    const startButton = document.getElementById('start-button');
+    const gameContainer = document.getElementById('game-container');
+    const menuMusic = document.getElementById('menu-theme');
+    menuMusic.play();  // Only works if Autoplay isn't blocked
 
-  startButton.addEventListener('click', () => {
-    startMenu.style.display = 'none';
-    gameContainer.style.display = 'flex';
-    menuMusic.pause();
-    menuMusic.currentTime = 0;
+    startButton.addEventListener('click', () => {
+      startMenu.style.display = 'none';
+      gameContainer.style.display = 'flex';
+      menuMusic.pause();
+      menuMusic.currentTime = 0;
   });
 });
 

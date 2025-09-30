@@ -290,9 +290,11 @@ Licensed for personal, educational, and non-commercial use only.
           console.error("Playback failed:", err);
 
         // Stop menu music
-        menuMusic.pause();
-        menuMusic.cuttentTime = 0;
-        });
+       if (menuMusic) {
+         menuMusic.pause();
+         menuMusic.currentTime = 0;
+       }
+     });
       });
     });
 

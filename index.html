@@ -354,11 +354,21 @@ Licensed for personal, educational, and non-commercial use only.
     ];
 
     // Audio assets for in-game sounds (unchanged)
-    const sounds = {
-      footstep: new Audio('https://github.com/sleepyprogrammer1012/Code_Craft_Spellbook/blob/main/music/341695_5260871-lq.mp3'),
-      spell:    new Audio('https://github.com/sleepyprogrammer1012/Code_Craft_Spellbook/blob/main/music/320654_5260871-lq.mp3'),
-      enemyDie: new Audio('https://github.com/sleepyprogrammer1012/Code_Craft_Spellbook/blob/main/music/enemyDie.mp3') // whatever you host
-    };
+   const base = 'https://cdn.jsdelivr.net/gh/sleepyprogrammer1012/Code_Craft_Spellbook@main/music';
+
+   const sounds = {
+     footstep: new Audio(`${base}/341695_5260871-lq.mp3`),
+     spell:    new Audio(`${base}/320654_5260871-lq.mp3`),
+     enemyDie: new Audio(`${base}/331912_3248244-lq.mp3`)
+   };
+
+   // Optional: request CORS-safe mode (won't help if host blocks CORS)
+   for (const s of Object.values(sounds)) {
+     s.crossOrigin = 'anonymous';
+     s.preload = 'auto';
+     s.load();
+     s.addEventListener('error', e => console.warn('SFX load error', e));
+   }
 
     // Logging
     function log(msg, type='info') {

@@ -220,7 +220,7 @@ Licensed for personal, educational, and non-commercial use only.
 </head>  
 <body>
   
-  <!-- Audio -->
+  <!-- Audio (muted autoplay as fallback) -->
   <audio id="menu_theme" preload="auto" autoplay loop muted>
     <source src="https://sleepyprogrammer1012.github.io/Code_Craft_Spellbook/music/menu_theme.mp3" type="audio/mpeg" />
   </audio>
@@ -234,8 +234,8 @@ Licensed for personal, educational, and non-commercial use only.
     <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
   </div>
   
-  <!-- Game Container -->
-  <div id="game-container" style="display: none;">
+   <!-- Game Container -->
+  <div id="game-container">
     <div id="game-world">
       <div id="hud">
         Score: <span id="score">0</span>&nbsp;&nbsp;
@@ -244,6 +244,7 @@ Licensed for personal, educational, and non-commercial use only.
       <div id="player" class="entity"></div>
       <div id="speech-bubble"></div>
     </div>
+
     <div id="spellbook">
       <h2>CodeCraft Spellbook</h2>
       <p id="quest-text"></p>
@@ -253,50 +254,69 @@ Licensed for personal, educational, and non-commercial use only.
       </div>
       <textarea id="code-editor" spellcheck="false" disabled></textarea>
       <button id="run-button" disabled>Cast Spells</button>
-      <div id="console-output">
-        <p class="console-info">&gt; Console ready...</p>
-      </div>
+      <div id="console-output"><p class="console-info">&gt; Console ready...</p></div>
     </div>
   </div>
 
+
   <script>
-    
   document.addEventListener('DOMContentLoaded', () => {
-      const startMenu = document.getElementById('start-menu');
-      const startButton = document.getElementById('start-button');
-      const gameContainer = document.getElementById('game-container');
-      const menuMusic = document.getElementById('menu_theme');
-      const volumeSlider = document.getElementById('volume-slider');
+    // element references
+    const startMenu = document.getElementById('start-menu');
+    const startButton = document.getElementById('start-button');
+    const gameContainer = document.getElementById('game-container');
+    const menuMusic = document.getElementById('menu_theme');
+    const volumeSlider = document.getElementById('volume-slider');
 
-      // Set initial volume
-      menuMusic.volume = parseFloat(volumeSlider.value);
+    // small safety checks
+    if (!startMenu || !startButton || !gameContainer) {
+      console.error("Critical UI elements not found. startMenu/startButton/gameContainer missing.");
+      return;
+    }
 
-      // Unmute after DOM ready (some browsers still require a gesture to hear sound,
-      // but at least music is playing silently already).
-      menuMusic.muted = false;
+    // Initialize audio safely (guard existence)
+    if (menuMusic && volumeSlider) {
+      // numeric volume
+      menuMusic.volume = parseFloat(volumeSlider.value) || 0.5;
 
-      // Update volume when slider changes
-      volumeSlider.addEventListener('input', () => {
-        menuMusic.volume = parseFloat(volumeSlider.value);
+      // Try to play muted (autoplay policy friendly). If autoplay allowed, it will play.
+      // If blocked, the .catch won't disrupt the rest of the script.
+      menuMusic.muted = true;
+      menuMusic.play().then(() => {
+        // On success, unmute only after first user gesture to avoid policy blocks.
+        const unmuteOnGesture = () => {
+          menuMusic.muted = false;
+          document.removeEventListener('click', unmuteOnGesture);
+        };
+        document.addEventListener('click', unmuteOnGesture, { once: true });
+      }).catch((err) => {
+        // Not fatal — just log. This won't prevent the rest of the code from running.
+        console.warn("Autoplay blocked or failed (expected on some browsers):", err);
       });
 
-      // Start button click
-      startButton.addEventListener('click', () => {
-        startMenu.style.display = 'none';
-        gameContainer.style.display = 'block';
+      // Keep volume numeric when slider changes
+      volumeSlider.addEventListener('input', () => {
+        menuMusic.volume = parseFloat(volumeSlider.value) || 0.5;
+      });
+    }
 
-        menuMusic.volume = parseFloat(volumeSlider.value); // ensure numeric
-        menuMusic.play().catch(err => {
-          console.error("Playback failed:", err);
+    // Start button behavior: hide start menu, show game, stop menu music
+    startButton.addEventListener('click', () => {
+      startMenu.style.display = 'none';
+      gameContainer.style.display = 'block';
 
-        // Stop menu music
-        if (menuMusic) {
+      if (menuMusic) {
+        try {
           menuMusic.pause();
           menuMusic.currentTime = 0;
+        } catch (e) {
+          console.warn("Failed to stop menu music:", e);
         }
-      });
+      }
+    });
      
 
+    // --- Now the rest of your game setup (kept intact) ---
     const world     = document.getElementById('game-world');
     const playerEl  = document.getElementById('player');
     const bubble    = document.getElementById('speech-bubble');
@@ -317,127 +337,23 @@ Licensed for personal, educational, and non-commercial use only.
     let currentLevel  = 0;
     const learned     = [];
 
-    // Spell definitions & tutorial levels
+    // Levels (unchanged)
     const levels = [
-      {
-        unlock: 'print',
-        tutorial:
-`Level 1 – The Basics of print()
-Use print("Hello!") to display text.
-
-Try: print("Hello, adventurer!")`,
-        goalCheck: lines => lines.some(l => /^print\s*\(/.test(l))
-      },
-      {
-        unlock: 'move',
-        tutorial:
-`Level 2 – Moving Around with move()
-Use move("direction", steps) to reposition.
-
-Example:
-  print("Moving…");
-  move("up", 2)`,
-        goalCheck: lines => lines.some(l => /^move\s*\(/.test(l))
-      },
-      {
-        unlock: 'wait',
-        tutorial:
-`Level 3 – Pausing with wait()
-Use wait(ms) to pause your spell sequence.
-
-Example:
-  print("Start");
-  wait(1000);
-  print("Done waiting")`,
-        goalCheck: lines => lines.some(l => /^wait\s*\(/.test(l))
-      },
-      {
-        unlock: 'spawn',
-        tutorial:
-`Level 4 – Spawning Entities
-Use spawn("type", x, y) to add new entities.
-
-Example: spawn("enemy", 300, 200)`,
-        goalCheck: lines => lines.some(l => /^spawn\s*\(/.test(l))
-      },
-      {
-        unlock: 'destroyAll',
-        tutorial:
-`Level 5 – Clearing Entities
-Use destroyAll("type") to remove all of a given type.
-
-Example: destroyAll("enemy")`,
-        goalCheck: lines => lines.some(l => /^destroyAll\s*\(/.test(l))
-      },
-      {
-        unlock: 'changeColor',
-        tutorial:
-`Level 6 – Changing Colors
-Use changeColor("id", "#RRGGBB") to tweak visuals.
-
-Example: changeColor("player", "#ff0000")`,
-        goalCheck: lines => lines.some(l => /^changeColor\s*\(/.test(l))
-      },
-      {
-        unlock: 'playSound',
-        tutorial:
-`Level 7 – Playing Sounds
-Use playSound("name") to trigger audio.
-
-Example: playSound("spell")`,
-        goalCheck: lines => lines.some(l => /^playSound\s*\(/.test(l))
-      },
-      {
-        unlock: 'adjustScore',
-        tutorial:
-`Level 8 – Score Management
-Use adjustScore(n) to modify the score display.
-
-Example: adjustScore(10)`,
-        goalCheck: lines => lines.some(l => /^adjustScore\s*\(/.test(l))
-      },
-      {
-        unlock: 'adjustHealth',
-        tutorial:
-`Level 9 – Health Management
-Use adjustHealth(n) to change health.
-
-Example: adjustHealth(-20)`,
-        goalCheck: lines => lines.some(l => /^adjustHealth\s*\(/.test(l))
-      },
-      {
-        unlock: 'random',
-        tutorial:
-`Level 10 – Randomness
-Use random(min, max) to get a random integer.
-
-Example: random(1,100)`,
-        goalCheck: lines => lines.some(l => /^random\s*\(/.test(l))
-      },
-      {
-        unlock: 'repeat',
-        tutorial:
-`Level 11 – Looping
-Use repeat(times, "code") to run code blocks multiple times.
-
-Example:
-  repeat(3, "print('Echo'); wait(300)")`,
-        goalCheck: lines => lines.some(l => /^repeat\s*\(/.test(l))
-      },
-      {
-        unlock: 'ifCollision',
-        tutorial:
-`Level 12 – Simple Conditionals
-Use ifCollision("id1","id2","code") to run on overlap.
-
-Example:
-  spawn("enemy",200,200);
-  ifCollision("player","enemy","destroyAll('enemy');adjustScore(5)")`,
-        goalCheck: lines => lines.some(l => /^ifCollision\s*\(/.test(l))
-      }
+      { unlock: 'print', tutorial: `Level 1 – The Basics of print()\nUse print("Hello!") to display text.\n\nTry: print("Hello, adventurer!")`, goalCheck: lines => lines.some(l => /^print\s*\(/.test(l)) },
+      { unlock: 'move', tutorial: `Level 2 – Moving Around with move()\nUse move("direction", steps) to reposition.\n\nExample:\n  print("Moving…");\n  move("up", 2)`, goalCheck: lines => lines.some(l => /^move\s*\(/.test(l)) },
+      { unlock: 'wait', tutorial: `Level 3 – Pausing with wait()\nUse wait(ms) to pause your spell sequence.\n\nExample:\n  print("Start");\n  wait(1000);\n  print("Done waiting")`, goalCheck: lines => lines.some(l => /^wait\s*\(/.test(l)) },
+      { unlock: 'spawn', tutorial: `Level 4 – Spawning Entities\nUse spawn("type", x, y) to add new entities.\n\nExample: spawn("enemy", 300, 200)`, goalCheck: lines => lines.some(l => /^spawn\s*\(/.test(l)) },
+      { unlock: 'destroyAll', tutorial: `Level 5 – Clearing Entities\nUse destroyAll("type") to remove all of a given type.\n\nExample: destroyAll("enemy")`, goalCheck: lines => lines.some(l => /^destroyAll\s*\(/.test(l)) },
+      { unlock: 'changeColor', tutorial: `Level 6 – Changing Colors\nUse changeColor("id", "#RRGGBB") to tweak visuals.\n\nExample: changeColor("player", "#ff0000")`, goalCheck: lines => lines.some(l => /^changeColor\s*\(/.test(l)) },
+      { unlock: 'playSound', tutorial: `Level 7 – Playing Sounds\nUse playSound("name") to trigger audio.\n\nExample: playSound("spell")`, goalCheck: lines => lines.some(l => /^playSound\s*\(/.test(l)) },
+      { unlock: 'adjustScore', tutorial: `Level 8 – Score Management\nUse adjustScore(n) to modify the score display.\n\nExample: adjustScore(10)`, goalCheck: lines => lines.some(l => /^adjustScore\s*\(/.test(l)) },
+      { unlock: 'adjustHealth', tutorial: `Level 9 – Health Management\nUse adjustHealth(n) to change health.\n\nExample: adjustHealth(-20)`, goalCheck: lines => lines.some(l => /^adjustHealth\s*\(/.test(l)) },
+      { unlock: 'random', tutorial: `Level 10 – Randomness\nUse random(min, max) to get a random integer.\n\nExample: random(1,100)`, goalCheck: lines => lines.some(l => /^random\s*\(/.test(l)) },
+      { unlock: 'repeat', tutorial: `Level 11 – Looping\nUse repeat(times, "code") to run code blocks multiple times.\n\nExample:\n  repeat(3, "print('Echo'); wait(300)")`, goalCheck: lines => lines.some(l => /^repeat\s*\(/.test(l)) },
+      { unlock: 'ifCollision', tutorial: `Level 12 – Simple Conditionals\nUse ifCollision("id1","id2","code") to run on overlap.\n\nExample:\n  spawn("enemy",200,200);\n  ifCollision("player","enemy","destroyAll('enemy');adjustScore(5)")`, goalCheck: lines => lines.some(l => /^ifCollision\s*\(/.test(l)) }
     ];
 
-    // Audio assets
+    // Audio assets for in-game sounds (unchanged)
     const sounds = {
       footstep: new Audio('https://freesound.org/data/previews/341/341695_5260871-lq.mp3'),
       spell:    new Audio('https://freesound.org/data/previews/320/320654_5260871-lq.mp3'),
@@ -446,33 +362,15 @@ Example:
 
     // Logging
     function log(msg, type='info') {
-      consoleEl.innerHTML = `<p class="console-${type}">&gt; ${msg}</p>`;
+      if (consoleEl) consoleEl.innerHTML = `<p class="console-${type}">&gt; ${msg}</p>`;
     }
 
-    // Update HUD
-    function updateHUD() {
-      scoreEl.textContent  = score;
-      healthEl.textContent = health;
-    }
-
-    // Update player position
-    function updatePlayer() {
-      playerEl.style.left = pos.x + 'px';
-      playerEl.style.top  = pos.y + 'px';
-    }
-
-    // Render learned spells list
-    function renderLearned() {
-      spellsUl.innerHTML = '';
-      learned.forEach(s => {
-        const li = document.createElement('li');
-        li.textContent = s + '()';
-        spellsUl.appendChild(li);
-      });
-    }
-
-    // Show a speech bubble at the player
+    // HUD and utilities
+    function updateHUD() { if (scoreEl) scoreEl.textContent = score; if (healthEl) healthEl.textContent = health; }
+    function updatePlayer() { if (playerEl) { playerEl.style.left = pos.x + 'px'; playerEl.style.top = pos.y + 'px'; } }
+    function renderLearned() { if (!spellsUl) return; spellsUl.innerHTML = ''; learned.forEach(s => { const li = document.createElement('li'); li.textContent = s + '()'; spellsUl.appendChild(li); }); }
     function animateSpeech(text) {
+      if (!bubble || !world || !playerEl) return;
       bubble.textContent = text;
       const wr = world.getBoundingClientRect();
       const pr = playerEl.getBoundingClientRect();
@@ -482,18 +380,16 @@ Example:
       setTimeout(() => bubble.classList.remove('visible'), 1800);
     }
 
-    // Execute a list of statements
+    // Execution engine (kept intact, small guard checks)
     async function execStatements(lines) {
       for (let stmt of lines) {
         let m;
-        // print()
         if (m = stmt.match(/^print\(\s*["'](.+?)["']\s*\)$/)) {
           animateSpeech(m[1]);
-          sounds.spell.play();
+          if (sounds.spell) sounds.spell.play().catch(()=>{});
         }
-        // move()
         else if (m = stmt.match(/^move\(\s*["'](up|down|left|right)["']\s*,\s*(\d+)\s*\)$/)) {
-          sounds.footstep.play();
+          if (sounds.footstep) sounds.footstep.play().catch(()=>{});
           for (let i = 0; i < +m[2]; i++) {
             if (m[1] === 'up')    pos.y -= speed;
             if (m[1] === 'down')  pos.y += speed;
@@ -503,19 +399,16 @@ Example:
             await new Promise(r => setTimeout(r, 100));
           }
         }
-        // wait()
         else if (m = stmt.match(/^wait\(\s*(\d+)\s*\)$/)) {
           await new Promise(r => setTimeout(r, +m[1]));
         }
-        // spawn()
         else if (m = stmt.match(/^spawn\(\s*["'](\w+)["']\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/)) {
-          const id       = `ent${++entityCount}`;
-          const div      = document.createElement('div');
-          div.id         = id;
-          div.className  = 'entity ' + m[1];
+          const id = `ent${++entityCount}`;
+          const div = document.createElement('div');
+          div.id = id;
+          div.className = 'entity ' + m[1];
           div.style.left = m[2] + 'px';
-          div.style.top  = m[3] + 'px';
-          // default style for "enemy"
+          div.style.top = m[3] + 'px';
           if (m[1] === 'enemy') {
             div.style.width  = '30px';
             div.style.height = '30px';
@@ -523,57 +416,46 @@ Example:
             div.style.border = '2px solid #6c1e1e';
             div.style.borderRadius = '50%';
           }
-          world.appendChild(div);
+          if (world) world.appendChild(div);
         }
-        // destroyAll()
         else if (m = stmt.match(/^destroyAll\(\s*["'](\w+)["']\s*\)$/)) {
           document.querySelectorAll(`.${m[1]}`).forEach(el => {
             el.remove();
-            sounds.enemyDie.play();
+            if (sounds.enemyDie) sounds.enemyDie.play().catch(()=>{});
           });
         }
-        // changeColor()
         else if (m = stmt.match(/^changeColor\(\s*["'](\w+)["']\s*,\s*["'](#?\w+)["']\s*\)$/)) {
           const el = document.getElementById(m[1]);
           if (el) el.style.background = m[2];
         }
-        // playSound()
         else if (m = stmt.match(/^playSound\(\s*["'](\w+)["']\s*\)$/)) {
           const s = sounds[m[1]];
-          if (s) s.play();
+          if (s) s.play().catch(()=>{});
         }
-        // adjustScore()
         else if (m = stmt.match(/^adjustScore\(\s*(-?\d+)\s*\)$/)) {
           score += +m[1];
           updateHUD();
         }
-        // adjustHealth()
         else if (m = stmt.match(/^adjustHealth\(\s*(-?\d+)\s*\)$/)) {
           health = Math.max(0, health + +m[1]);
           updateHUD();
         }
-        // random()
         else if (m = stmt.match(/^random\(\s*(\d+)\s*,\s*(\d+)\s*\)$/)) {
           const val = Math.floor(Math.random() * (+m[2] - +m[1] + 1)) + +m[1];
           log(`random → ${val}`, 'info');
         }
-        // repeat()
         else if (m = stmt.match(/^repeat\(\s*(\d+)\s*,\s*["'](.+?)["']\s*\)$/)) {
-          const [_, times, block] = m;
+          const [, times, block] = m;
           const inner = block.split(/[\n;]/).map(s=>s.trim()).filter(s=>s);
-          for (let i = 0; i < +times; i++) {
-            await execStatements(inner);
-          }
+          for (let i = 0; i < +times; i++) await execStatements(inner);
         }
-        // ifCollision()
         else if (m = stmt.match(/^ifCollision\(\s*["'](\w+)["']\s*,\s*["'](\w+)["']\s*,\s*["'](.+?)["']\s*\)$/)) {
           const a = document.getElementById(m[1]);
           const b = document.getElementById(m[2]);
           if (a && b) {
             const ra = a.getBoundingClientRect();
             const rb = b.getBoundingClientRect();
-            if (!(ra.right < rb.left || ra.left > rb.right ||
-                  ra.bottom < rb.top || ra.top > rb.bottom)) {
+            if (!(ra.right < rb.left || ra.left > rb.right || ra.bottom < rb.top || ra.top > rb.bottom)) {
               const block = m[3].split(/[\n;]/).map(s=>s.trim()).filter(s=>s);
               await execStatements(block);
             }
@@ -586,14 +468,10 @@ Example:
       }
     }
 
-    // Cast the player's code
     async function castSpell() {
-      const lines = editor.value
-        .split(/[\n;]/).map(s=>s.trim()).filter(s=>s);
+      const lines = editor.value.split(/[\n;]/).map(s=>s.trim()).filter(s=>s);
       if (!lines.length) { log("No spells entered.", 'error'); return; }
       await execStatements(lines);
-
-      // Check level completion
       const lvl = levels[currentLevel];
       if (lvl.goalCheck(lines)) {
         learned.push(lvl.unlock);
@@ -601,24 +479,18 @@ Example:
         log(`You’ve mastered ${lvl.unlock}()!`, 'success');
         editor.disabled = true;
         runBtn.disabled = true;
-
-        // Advance after a short delay
-        if (currentLevel + 1 < levels.length) {
-          setTimeout(() => loadLevel(currentLevel + 1), 1000);
-        } else {
-          log('🎉 All levels complete! You are a CodeCraft master!', 'success');
-        }
+        if (currentLevel + 1 < levels.length) setTimeout(() => loadLevel(currentLevel + 1), 1000);
+        else log('🎉 All levels complete! You are a CodeCraft master!', 'success');
       }
     }
 
-    // Load a level tutorial
     function loadLevel(i) {
       currentLevel = i;
       const lvl = levels[i];
-      questText.textContent = lvl.tutorial;
-      editor.value      = '';
-      editor.disabled   = false;
-      runBtn.disabled   = false;
+      if (questText) questText.textContent = lvl.tutorial;
+      if (editor) editor.value = '';
+      if (editor) editor.disabled = false;
+      if (runBtn) runBtn.disabled = false;
       log(`Level ${i+1}: Learn ${lvl.unlock}()`, 'info');
     }
 
@@ -629,22 +501,22 @@ Example:
       if (e.key === 'ArrowDown')  pos.y = Math.min(500 - 40, pos.y + speed);
       if (e.key === 'ArrowLeft')  pos.x = Math.max(0, pos.x - speed);
       if (e.key === 'ArrowRight') pos.x = Math.min(500 - 40, pos.x + speed);
-      sounds.footstep.play();
+      if (sounds.footstep) sounds.footstep.play().catch(()=>{});
       updatePlayer();
     });
 
-    // Button click
-    runBtn.addEventListener('click', castSpell);
+    // Run button
+    if (runBtn) runBtn.addEventListener('click', castSpell);
 
-    // Initialize
+    // init
     updatePlayer();
     updateHUD();
     renderLearned();
     loadLevel(0);
- 
+  });
   </script>
-  </body>
-  </html>
+</body>
+</html>
 
 <!--© 2025 sleepyprogrammer1012. All rights reserved.
 

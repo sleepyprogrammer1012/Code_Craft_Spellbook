@@ -269,11 +269,11 @@ Licensed for personal, educational, and non-commercial use only.
       const volumeSlider = document.getElementById('volume-slider');
 
       // Set initial volume
-      menuMusic.volume = volumeSlider.value;
+      menuMusic.volume = parseFloat(volumeSlider.value);
 
       // Update volume when slider changes
       volumeSlider.addEventListener('input', () => {
-        menuMusic.volume = volumeSlider.value;
+        menuMusic.volume = parseFloat(volumeSlider.value);
       });
 
       // Start button click
@@ -281,6 +281,7 @@ Licensed for personal, educational, and non-commercial use only.
         startMenu.style.display = 'none';
         gameContainer.style.display = 'block';
 
+        menuMusic.volume = parseFloat(volumeSlider.value); // ensure numeric
         menuMusic.play().catch(err => {
           console.error("Playback failed:", err);
         });

@@ -221,7 +221,7 @@ Licensed for personal, educational, and non-commercial use only.
 <body>
   
   <!-- Audio -->
-  <audio id="menu_theme" preload="auto" loop>
+  <audio id="menu_theme" preload="auto" autoplay loop muted>
     <source src="https://sleepyprogrammer1012.github.io/Code_Craft_Spellbook/music/menu_theme.mp3" type="audio/mpeg" />
   </audio>
   
@@ -271,6 +271,10 @@ Licensed for personal, educational, and non-commercial use only.
       // Set initial volume
       menuMusic.volume = parseFloat(volumeSlider.value);
 
+      // Unmute after DOM ready (some browsers still require a gesture to hear sound,
+      // but at least music is playing silently already).
+      menuMusic.muted = false;
+
       // Update volume when slider changes
       volumeSlider.addEventListener('input', () => {
         menuMusic.volume = parseFloat(volumeSlider.value);
@@ -284,6 +288,10 @@ Licensed for personal, educational, and non-commercial use only.
         menuMusic.volume = parseFloat(volumeSlider.value); // ensure numeric
         menuMusic.play().catch(err => {
           console.error("Playback failed:", err);
+
+        // Stop menu music
+        menuMusic.pause();
+        menuMusic.cuttentTime = 0;
         });
       });
     });

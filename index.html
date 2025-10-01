@@ -51,6 +51,7 @@ Licensed for personal, educational, and non-commercial use only.
       border-radius: 5px;
       transition: left 0.1s linear, top 0.1s linear;
     }
+    
     #player {
       width: 40px;
       height: 40px;
@@ -59,6 +60,7 @@ Licensed for personal, educational, and non-commercial use only.
       left: 50px;
       top: 400px;
     }
+    
     #speech-bubble {
       position: absolute;
       background: white;
@@ -73,6 +75,7 @@ Licensed for personal, educational, and non-commercial use only.
       visibility: hidden;
       transition: opacity 0.3s, visibility 0.3s;
     }
+    
     #speech-bubble.visible {
       opacity: 1;
       visibility: visible;
@@ -98,6 +101,7 @@ Licensed for personal, educational, and non-commercial use only.
       border: 4px solid #444;
       border-radius: 5px;
     }
+    
     #spellbook h2 {
       margin: 0 0 15px;
       font-family: 'Press Start 2P', cursive;
@@ -105,6 +109,7 @@ Licensed for personal, educational, and non-commercial use only.
       text-align: center;
       font-size: 24px;
     }
+    
     #quest-text {
       background: #252525;
       border-left: 4px solid #ffd700;
@@ -114,20 +119,24 @@ Licensed for personal, educational, and non-commercial use only.
       white-space: pre-wrap;
       font-family: monospace;
     }
+    
     #spell-list {
       margin-bottom: 15px;
     }
+    
     #spell-list h3 {
       margin: 0 0 5px;
       font-family: 'Press Start 2P', cursive;
       font-size: 16px;
       color: #ffd700;
     }
+    
     #learned-spells {
       list-style: none;
       padding: 0;
       margin: 0;
     }
+    
     #learned-spells li {
       font-family: monospace;
       font-size: 16px;
@@ -146,6 +155,7 @@ Licensed for personal, educational, and non-commercial use only.
       font-family: 'VT323', monospace;
       resize: none;
     }
+    
     #run-button {
       margin-top: 12px;
       padding: 10px;
@@ -158,9 +168,11 @@ Licensed for personal, educational, and non-commercial use only.
       font-size: 16px;
       transition: background 0.2s;
     }
+    
     #run-button:hover {
       background: #45a049;
     }
+    
     #console-output {
       margin-top: 12px;
       background: #1e1e1e;
@@ -232,6 +244,7 @@ Licensed for personal, educational, and non-commercial use only.
     <br><br>
     <label for="volume-slider">Volume:</label>
     <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
+    <button id="mute-toggle" aria-pressed="true" type="button">🔇 Unmute</button>
   </div>
   
    <!-- Game Container -->
@@ -267,6 +280,7 @@ Licensed for personal, educational, and non-commercial use only.
     const gameContainer = document.getElementById('game-container');
     const menuMusic = document.getElementById('menu_theme');
     const volumeSlider = document.getElementById('volume-slider');
+    const muteToggle = document.getElementById('mute-toggle');
 
     // small safety checks
     if (!startMenu || !startButton || !gameContainer) {
